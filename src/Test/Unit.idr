@@ -1,22 +1,24 @@
 module Test.Unit
 
 import Control.App
-import Language.Reflection
 
 data AssertionFailure : Type where
   Fail : String -> AssertionFailure
 
 CanAssert = HasErr AssertionFailure
 
+public export
 pass : App es ()
 pass = pure ()
 
+public export
 fail : CanAssert es => String -> App es t
 fail = throw . Fail
 
 TestFunc : Type
 TestFunc = {es : _} -> CanAssert es => App es ()
 
+public export
 record Test where
   constructor MkTest
   desc : String
@@ -38,13 +40,16 @@ runTest t = do putStr (t.desc ++ ": ")
 forEach : Foldable t => Monad m => (a -> m ()) -> t a -> m ()
 forEach f = foldlM (const f) ()
 
+public export
 tests : {es : _} -> PrimIO es => List Test -> App es ()
 tests = forEach runTest
 
+public export
 assert : CanAssert es => Bool -> String -> App es ()
 assert True  msg = pass
 assert False msg = fail msg
 
+public export
 assertEq : CanAssert es => Eq a => Show a => a -> a -> App es ()
 assertEq x y = assert (x == y)
   ("expected " ++ show x ++ ", got " ++ show y)
