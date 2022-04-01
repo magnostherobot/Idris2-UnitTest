@@ -1,0 +1,10 @@
+env.sh
+
+.build/
+build/
+depends/
+UnitTest.ipkg
+
+*.idr~
+*.o
+*.so
