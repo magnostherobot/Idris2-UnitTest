@@ -54,12 +54,20 @@ assertEq : CanAssert es => Eq a => Show a => a -> a -> App es ()
 assertEq x y = assert (x == y)
   ("expected " ++ show x ++ ", got " ++ show y)
 
+public export
+assertThrows : (e : Error) -> CanAssert es => App (e :: es) () -> App es ()
+assertThrows e a = handle a (const $ fail "no throw") (const pass)
+
 ex : Test
 ex = MkTest "example description" $ do let x = 1
                                        assertEq x 2
 
+throwCheck : Test
+throwCheck = MkTest "check assertThrows" $ do
+  assertThrows Integer $ throw 4
+
 app : {es : _} -> PrimIO es => App es ()
-app = tests [ex, ex]
+app = tests [ex, throwCheck]
 
 main : IO ()
 main = run app
