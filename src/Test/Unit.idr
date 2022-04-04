@@ -2,6 +2,7 @@ module Test.Unit
 
 import Control.App
 
+public export
 data AssertionFailure : Type where
   Fail : String -> AssertionFailure
 
@@ -15,6 +16,7 @@ public export
 fail : CanAssert es => String -> App es t
 fail = throw . Fail
 
+public export
 TestFunc : Type
 TestFunc = {es : _} -> CanAssert es => App es ()
 
@@ -24,6 +26,7 @@ record Test where
   desc : String
   f : TestFunc
 
+public export
 PrimIO es => HasIO (App es) where
   liftIO x = primIO x
 
@@ -33,16 +36,14 @@ testPassed () = putStrLn "test passed"
 testFailed : {es : _} -> PrimIO es => AssertionFailure -> App es ()
 testFailed (Fail msg) = putStrLn ("test failed: " ++ msg)
 
-runTest : {es : _} -> PrimIO es => Test -> App es ()
-runTest t = do putStr (t.desc ++ ": ")
-               handle t.f testPassed testFailed
+runTest : {es : _} -> PrimIO es => List Test -> Test -> App es (List Test)
+runTest xs t = do putStr (t.desc ++ ": ")
+                  let passed = (\_  => testPassed () >> pure xs)
+                  let failed = (\af => testFailed af >> pure (t :: xs))
+                  handle t.f passed failed
 
 forEach : Foldable t => Monad m => (a -> m ()) -> t a -> m ()
 forEach f = foldlM (const f) ()
-
-public export
-tests : {es : _} -> PrimIO es => List Test -> App es ()
-tests = forEach runTest
 
 public export
 assert : CanAssert es => Bool -> String -> App es ()
@@ -55,19 +56,14 @@ assertEq x y = assert (x == y)
   ("expected " ++ show x ++ ", got " ++ show y)
 
 public export
-assertThrows : (e : Error) -> CanAssert es => App (e :: es) () -> App es ()
+assertThrows : CanAssert es => (e : Error) -> App (e :: es) () -> App es ()
 assertThrows e a = handle a (const $ fail "no throw") (const pass)
 
-ex : Test
-ex = MkTest "example description" $ do let x = 1
-                                       assertEq x 2
+public export
+runTestsApp : {es : _} -> PrimIO es => Foldable t => t Test -> App es ()
+runTestsApp ts = do fails <- foldlM runTest [] ts
+                    putStrLn (show (length fails) ++ " test(s) failed")
 
-throwCheck : Test
-throwCheck = MkTest "check assertThrows" $ do
-  assertThrows Integer $ throw 4
-
-app : {es : _} -> PrimIO es => App es ()
-app = tests [ex, throwCheck]
-
-main : IO ()
-main = run app
+public export
+runTests : Foldable t => t Test -> IO ()
+runTests = run . runTestsApp

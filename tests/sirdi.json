@@ -1,0 +1,12 @@
+[{
+    "modules": [
+        "Main",
+        "Test.Test.Unit"
+    ],
+    "name": "UnitTestTests",
+    "main": "Main",
+    "deps": [{
+        "name": "UnitTest",
+        "local": "../"
+    }]
+}]

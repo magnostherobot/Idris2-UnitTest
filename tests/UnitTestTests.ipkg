@@ -1,0 +1,6 @@
+package UnitTestTests
+sourcedir = "src"
+modules = Main, Test.Test.Unit
+depends = UnitTest10427219144099922475
+main = Main
+executable = main

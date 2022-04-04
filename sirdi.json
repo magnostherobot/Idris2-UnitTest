@@ -1,6 +1,5 @@
 [{
     "modules": [ "Test.Unit" ],
     "name": "UnitTest",
-    "main": "Test.Unit",
     "deps": [ ]
 }]

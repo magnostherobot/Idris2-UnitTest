@@ -8,3 +8,5 @@ UnitTest.ipkg
 *.idr~
 *.o
 *.so
+
+*.sw?
