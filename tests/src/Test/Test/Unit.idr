@@ -1,10 +1,12 @@
 module Test.Test.Unit
 
+import System
+
 import Test.Unit
 import Control.App
 
 public export
-tests : List Test
+tests : List (Test es)
 tests = [ MkTest "assert should throw on False" $ do
           assertThrows AssertionFailure $
             assert False "should throw"
