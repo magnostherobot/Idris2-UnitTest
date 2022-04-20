@@ -3,7 +3,6 @@ module Test.Test.Unit
 import System
 
 import Test.Unit
-import Control.App
 
 public export
 tests : List (Test es)

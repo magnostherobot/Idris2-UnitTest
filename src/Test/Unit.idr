@@ -1,6 +1,6 @@
 module Test.Unit
 
-import Control.App
+import public Control.App
 
 public export
 data AssertionFailure : Type where
