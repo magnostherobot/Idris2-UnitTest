@@ -65,6 +65,11 @@ assertThrows : CanAssert es => (e : Error) -> App (e :: es) () -> App es ()
 assertThrows e a = handle a (\_ => fail "no throw") (\_ => pass)
 
 public export
+assertDoesNotThrow : CanAssert es => (e : Error) -> App (e :: es) () ->
+                     App es ()
+assertDoesNotThrow e a = handle a (\_ => pass) (\_ => fail "throw")
+
+public export
 runTestsApp : {es : _} -> PrimIO es => Foldable t => t (Test es) -> App es ()
 runTestsApp ts = do fails <- foldlM runTest [] ts
                     putStrLn (show (length fails) ++ " test(s) failed")

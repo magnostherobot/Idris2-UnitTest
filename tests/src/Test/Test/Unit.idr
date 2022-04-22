@@ -33,4 +33,19 @@ tests = [ MkTest "assert should throw on False" $ do
             assertThrows Integer $
               assertThrows Integer $
                 throw 24
+
+        , MkTest "assertDoesNotThrow throws if inner app throws" $ do
+          assertThrows AssertionFailure $
+            assertDoesNotThrow Integer $
+              throw 2
+
+        , MkTest ("assertDoesNotThrow does not throw " ++
+                  "if inner app does not throw") $ do
+          assertDoesNotThrow String $
+            pass
+
+        , MkTest "assertDoesNotThrow only handles appropriate errors" $ do
+          assertThrows () $
+            assertDoesNotThrow Integer $
+              throw ()
         ]
