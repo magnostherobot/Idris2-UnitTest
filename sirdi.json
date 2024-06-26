@@ -1,5 +1,8 @@
 [{
     "modules": [ "Test.Unit" ],
     "name": "UnitTest",
-    "deps": [ ]
+    "deps": [{
+        "name": "contrib",
+        "legacy": true
+    }]
 }]

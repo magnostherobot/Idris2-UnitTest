@@ -1,5 +1,6 @@
 module Test.Unit
 
+import Control.Linear.LIO
 import public Control.App
 
 public export
@@ -34,46 +35,62 @@ public export
 PrimIO es => HasIO (App (e :: es)) where
   liftIO = lift . primIO
 
-testPassed : {es : _} -> PrimIO es => () -> App es ()
-testPassed () = putStrLn "test passed"
+bindd : App1 es a -> ((1 _ : a) -> App1 es b) -> App1 es b
+bindd x f = bindApp1 x f
 
-testFailed : {es : _} -> PrimIO es => AssertionFailure -> App es ()
-testFailed (Fail msg) = putStrLn ("test failed: " ++ msg)
+Functor (App1 es) where
+  map f ap = bindApp1 ap $ \x => ?gweg (f x)
 
-runTest : {es : _} -> PrimIO es => List (Test es) -> Test es ->
-          App es (List (Test es))
-runTest xs t = do putStr (t.desc ++ ": ")
-                  let passed = (\_  => testPassed () >> pure xs)
-                  let failed = (\af => testFailed af >> pure (t :: xs))
-                  handle t.f passed failed
+-- Applicative (App1 es) where
+--   (<*>) = ?gwe
+--   pure = ?gweh
+-- 
+-- Monad (App1 es) where
+--   a >>= b = ?ewg a b
+--  
+-- PrimIO es => HasLinearIO (App1 es) where
+--   liftIO1 = primIO1
 
-forEach : Foldable t => Monad m => (a -> m ()) -> t a -> m ()
-forEach f = foldlM (\_ => f) ()
-
-public export
-assert : CanAssert es => Bool -> String -> App es ()
-assert True  msg = pass
-assert False msg = fail msg
-
-public export
-assertEq : CanAssert es => Eq a => Show a => a -> a -> App es ()
-assertEq x y = assert (x == y)
-  ("expected " ++ show x ++ ", got " ++ show y)
-
-public export
-assertThrows : CanAssert es => (e : Error) -> App (e :: es) () -> App es ()
-assertThrows e a = handle a (\_ => fail "no throw") (\_ => pass)
-
-public export
-assertDoesNotThrow : CanAssert es => (e : Error) -> App (e :: es) () ->
-                     App es ()
-assertDoesNotThrow e a = handle a (\_ => pass) (\_ => fail "throw")
-
-public export
-runTestsApp : {es : _} -> PrimIO es => Foldable t => t (Test es) -> App es ()
-runTestsApp ts = do fails <- foldlM runTest [] ts
-                    putStrLn (show (length fails) ++ " test(s) failed")
-
-public export
-runTests : Foldable t => t (Test Init) -> IO ()
-runTests = run . runTestsApp
+-- testPassed : {es : _} -> PrimIO es => () -> App es ()
+-- testPassed () = putStrLn "test passed"
+-- 
+-- testFailed : {es : _} -> PrimIO es => AssertionFailure -> App es ()
+-- testFailed (Fail msg) = putStrLn ("test failed: " ++ msg)
+-- 
+-- runTest : {es : _} -> PrimIO es => List (Test es) -> Test es ->
+--           App es (List (Test es))
+-- runTest xs t = do putStr (t.desc ++ ": ")
+--                   let passed = (\_  => testPassed () >> pure xs)
+--                   let failed = (\af => testFailed af >> pure (t :: xs))
+--                   handle t.f passed failed
+-- 
+-- forEach : Foldable t => Monad m => (a -> m ()) -> t a -> m ()
+-- forEach f = foldlM (\_ => f) ()
+-- 
+-- public export
+-- assert : CanAssert es => Bool -> String -> App es ()
+-- assert True  msg = pass
+-- assert False msg = fail msg
+-- 
+-- public export
+-- assertEq : CanAssert es => Eq a => Show a => a -> a -> App es ()
+-- assertEq x y = assert (x == y)
+--   ("expected " ++ show x ++ ", got " ++ show y)
+-- 
+-- public export
+-- assertThrows : CanAssert es => (e : Error) -> App (e :: es) () -> App es ()
+-- assertThrows e a = handle a (\_ => fail "no throw") (\_ => pass)
+-- 
+-- public export
+-- assertDoesNotThrow : CanAssert es => (e : Error) -> App (e :: es) () ->
+--                      App es ()
+-- assertDoesNotThrow e a = handle a (\_ => pass) (\_ => fail "throw")
+-- 
+-- public export
+-- runTestsApp : {es : _} -> PrimIO es => Foldable t => t (Test es) -> App es ()
+-- runTestsApp ts = do fails <- foldlM runTest [] ts
+--                     putStrLn (show (length fails) ++ " test(s) failed")
+-- 
+-- public export
+-- runTests : Foldable t => t (Test Init) -> IO ()
+-- runTests = run . runTestsApp
